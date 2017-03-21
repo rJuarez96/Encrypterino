@@ -9,7 +9,7 @@
 import UIKit
 
 class EncryptionScreenController: UIViewController {
-    let prueba: Int =  2
+    //let prueba: Int =  2
     @IBOutlet weak var toEncryptLB: UITextView!
     
     @IBOutlet weak var toDecryptLB: UITextView!
