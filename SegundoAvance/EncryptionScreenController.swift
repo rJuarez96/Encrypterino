@@ -14,32 +14,51 @@ class EncryptionScreenController: UIViewController {
     
     @IBOutlet weak var toDecryptLB: UITextView!
     
-    @IBAction func EncryptBT(_ sender: UIButton) {
-        while (keyPairExists){
+    
+    var keyPairExists = AsymmetricCryptoManager.sharedInstance.keyPairExists() {
+        didSet {
+            if keyPairExists {
+                print("key exists")
+            } else {
+                print("key does not exist")
+            }
+        }
+    }
+    
+    
+    @IBAction func GenerateKey(_ sender: Any) {
+        if keyPairExists { // delete current key pair
             AsymmetricCryptoManager.sharedInstance.deleteSecureKeyPair({ (success) -> Void in
                 if success {
                     self.keyPairExists = false
                 }
             })
+        } else { // generate keypair
+            AsymmetricCryptoManager.sharedInstance.createSecureKeyPair({ (success, error) -> Void in
+                if success {
+                    self.keyPairExists = true
+                }
+            })
         }
-        // generate keypair
-        AsymmetricCryptoManager.sharedInstance.createSecureKeyPair({ (success, error) -> Void in
-            if success {
-                self.keyPairExists = true
-            }
-        })
+    }
+    
+    
+    @IBAction func EncryptBT(_ sender: UIButton) {
         
         //if toEncryptLB.text!.isEmpty {
             //SEND NOTIFICATION
         //}
         self.toDecryptLB.text = ""
-        self.view.endEditing(true)
+        print("borrado")
+        print("entro")
         AsymmetricCryptoManager.sharedInstance.encryptMessageWithPublicKey(toEncryptLB.text!) { (success, data, error) -> Void in
             if success {
+                print("encoded")
                 let b64encoded = data!.base64EncodedString(options: [])
                 self.toDecryptLB.text = b64encoded
                 self.toEncryptLB.text = ""
             } else {
+                print("notencoded")
                 //SEND NOTIFICATION
             }
         }
@@ -55,7 +74,6 @@ class EncryptionScreenController: UIViewController {
         //SEND NOTIFICATION
         //}
         self.toEncryptLB.text = ""
-        self.view.endEditing(true)
         AsymmetricCryptoManager.sharedInstance.decryptMessageWithPrivateKey(encryptedData) { (success, result, error) -> Void in
             if success {
                 self.toEncryptLB.text = result!
@@ -76,7 +94,5 @@ class EncryptionScreenController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
-    var keyPairExists = AsymmetricCryptoManager.sharedInstance.keyPairExists();
     
 }
